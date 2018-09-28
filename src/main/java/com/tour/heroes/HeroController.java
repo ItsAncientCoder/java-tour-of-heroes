@@ -4,17 +4,19 @@ import java.util.ArrayList;
 import java.util.List;
 
 import javax.annotation.PostConstruct;
-import javax.websocket.server.PathParam;
 
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequestMapping({ "/api/heroes" })
-@CrossOrigin(origins = "http://localhost:4200", maxAge = 3600)
+@CrossOrigin(origins = "*", maxAge = 3600)
 public class HeroController {
 
 	List<Hero> listOfHeroes = new ArrayList<>();
@@ -37,7 +39,7 @@ public class HeroController {
 	}
 
 	@RequestMapping(value = "/{id}", method = RequestMethod.DELETE)
-	public void deleteHero(@PathParam("id") int id) {
+	public void deleteHero(@PathVariable("id") int id) {
 		if (id < listOfHeroes.size()) {
 			listOfHeroes.remove(id);
 		} else {
@@ -54,5 +56,20 @@ public class HeroController {
 			new Exception("No hero found ");
 		}
 		return hero;
+	}
+
+	@RequestMapping(method = RequestMethod.POST)
+	public ResponseEntity<Hero> addHero(@RequestBody Hero hero) {
+		System.out.println(hero.getId() + " : " + hero.getName());
+		System.out.println(listOfHeroes.size() + " : " + listOfHeroes.size());
+		listOfHeroes.add(listOfHeroes.size(), hero);
+		return new ResponseEntity<Hero>(hero, HttpStatus.OK);
+	}
+
+	@RequestMapping(method = RequestMethod.PUT)
+	public ResponseEntity<Hero> updateHero(@RequestBody Hero hero) {
+		int id = hero.getId();
+		Hero newHero = listOfHeroes.set(id, hero);
+		return new ResponseEntity<Hero>(newHero, HttpStatus.OK);
 	}
 }
